@@ -1,0 +1,29 @@
+Host=habilis
+Hostname=129.199.81.135
+User=rriochet
+
+Host=t12
+Hostname=129.199.81.225
+User=rriochet
+
+Host=oberon
+Hostname=129.199.81.30
+User=rriochet
+ProxyCommand=ssh -qY t12 nc -q0 %h 22
+
+Host=puck3
+Hostname=puck3-GPU
+User=rriochet
+ProxyCommand=ssh -qY oberon nc %h 22
+
+Host=ransac
+Hostname=ransac.paris.inria.fr
+User=rriochet
+
+Host=sequoia
+Hostname=sequoia.paris.inria.fr
+User=rriochet
+
+Host=alexpi
+Hostname=176.158.43.30
+User=ronan

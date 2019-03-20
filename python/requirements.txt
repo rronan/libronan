@@ -1,0 +1,12 @@
+argparse
+numpy
+path.py
+Pillow
+pybullet
+pygame
+requests
+tensorflow-gpu
+torch
+torchvision
+torchviz
+tqdm
