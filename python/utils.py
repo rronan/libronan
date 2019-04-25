@@ -1,3 +1,5 @@
+from itertools import cycle
+
 from io import BytesIO
 from zipfile import ZipFile
 from copy import copy
@@ -7,7 +9,7 @@ import json
 import hashlib
 
 import argparse
-#import torch
+import torch
 import numpy as np
 import requests
 from PIL import Image
@@ -84,7 +86,7 @@ def image2mask(arr, color_list):
 
 def binmask2image(arr, color_list):
     im = np.zeros((arr.shape[1], arr.shape[2], 3))
-    for m,c in zip(arr, [[0,0,0]] + color_list):
+    for m,c in zip(arr, cycle([[0,0,0]] + color_list)):
         im += np.repeat(np.expand_dims(m,axis=-1),3,axis=-1) * np.array(c)
     return im.astype('uint8')
 
@@ -121,6 +123,7 @@ def ptpb(im):
     files = {'c': ('foo.png', byteimage.getvalue())}
     response = requests.post('https://ptpb.pw/', files=files)
     print(response.content.decode("utf-8"))
+
 
 def tis(im):
     byteimage = BytesIO()
