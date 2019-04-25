@@ -61,6 +61,9 @@ nnoremap pdb oimport pdb; pdb.set_trace()<Esc>
 inoremap pdb import pdb; pdb.set_trace()
 nnoremap ipdb oimport IPython; IPython.embed()<Esc>
 inoremap ipdb import IPython; IPython.embed()
+nnoremap imtis ofrom libronan.python.utils import tis, array2image, tensor2image, mask2image<Esc>
+inoremap imtis from libronan.python.utils import tis, array2image, tensor2image, mask2image
+
 
 
 vmap <C-Space> <Plug>(iron-send-motion)

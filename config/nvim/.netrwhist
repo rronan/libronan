@@ -1,3 +1,11 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =1
-let g:netrw_dirhist_1='/nfs/sequoia_data1/rriochet/physics_pybullet'
+let g:netrw_dirhist_cnt =9
+let g:netrw_dirhist_1='/nfs/sequoia_data1/rriochet/intphys/Content/Scripts/tools'
+let g:netrw_dirhist_2='/nfs/sequoia_data1/rriochet/intphys'
+let g:netrw_dirhist_3='/nfs/sequoia_data1/rriochet/intphys/Content'
+let g:netrw_dirhist_4='/nfs/sequoia_data1/rriochet/intphys/Content/Materials'
+let g:netrw_dirhist_5='/nfs/sequoia_data1/rriochet/intphys/Content/Materials/Floor'
+let g:netrw_dirhist_6='/nfs/sequoia_data1/rriochet/intphys/Content/Scripts/scenario'
+let g:netrw_dirhist_7='/nfs/sequoia_data1/rriochet/optim_state_seq'
+let g:netrw_dirhist_8='/nfs/sequoia_data1/rriochet/Positional_Reconstruction_Network/datasets'
+let g:netrw_dirhist_9='/nfs/sequoia_data1/rriochet/physics_pybullet'
