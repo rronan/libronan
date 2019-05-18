@@ -31,14 +31,19 @@ def run(args):
             if args.preview:
                 print(cmd + " --verbose")
             else:
+                exclude_nodes = '&'.join(['!' + x for x in args.exclude_nodes])
+                if len(exclude_nodes) > 0:
+                    exclude_nodes = "#$ -l h=" + exclude_nodes
                 sh = "\n".join([
                     "#!/bin/bash",
-                    f"{args.shell_intro}",
+                    args.shell_intro,
+                    exclude_nodes,
+                    "export PYTHONPATH='/sequoia/data1/rriochet:'",
                     "export MKL_NUM_THREADS=1",
                     "export NUMEXPR_NUM_THREADS=1",
                     "export OMP_NUM_THREADS=1",
                     'export TORCH_MODEL_ZOO="/sequoia/data1/rriochet/.torch/models"',
-                    f"{cmd}"
+                    cmd
                 ])
                 print(sh)
                 sh_path = args.outdir / f"_{name}.sh"
@@ -68,7 +73,10 @@ def run(args):
             i += 1
     print(f"cat {args.outdir}/_{timestamp}_{args.sweep_name}_*.o*")
     print(f"cat {args.outdir}/_{timestamp}_{args.sweep_name}_*.e*")
-    print(f'watch -n 300 "python /sequoia/data1/rriochet/visualization/html_results.py --indir {args.outdir.parent} --sweep_path {args.outdir}/{timestamp}_{args.sweep_name}.json"')
+    print(f"python /sequoia/data1/rriochet/visualization/html_results.py --indir {args.outdir.parent} --sweep_path {args.outdir}/{timestamp}_{args.sweep_name}.json")
+    if not args.preview:
+        with open('/sequoia/data1/rriochet/update_html_results.sh', 'a') as f:
+            f.write(f"\npython /sequoia/data1/rriochet/visualization/html_results.py --indir {args.outdir.parent} --sweep_path {args.outdir}/{timestamp}_{args.sweep_name}.json\n")
 
 
 def parse_args():
@@ -76,7 +84,8 @@ def parse_args():
     parser.add_argument('--outdir', type=Path, default='.')
     parser.add_argument('--sweep_path', default='sweep.yaml')
     parser.add_argument('--sweep_name', default='sweep')
-    parser.add_argument('--shell_intro', default='source ~/.bashrc')
+    parser.add_argument('--shell_intro', default='')
+    parser.add_argument('--exclude_nodes', nargs='+', default=[])
     parser.add_argument('--q', action='append', type=lambda kv: kv.split("="), dest='q')
     parser.add_argument('--mem_req', type=int, default=20)
     parser.add_argument('--h_vmem', type=int, default=100)
