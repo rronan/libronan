@@ -8,8 +8,8 @@ setlocal number
 
 autocmd BufWritePre * :%s/\s\+$//e
 
-setlocal textwidth=80
-setlocal colorcolumn=80
+setlocal textwidth=89
+setlocal colorcolumn=89
 " highlight OverLength ctermbg=darkred ctermfg=white guibg=#592929
 " match OverLength /\%106v.*/
 

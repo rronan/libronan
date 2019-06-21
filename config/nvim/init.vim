@@ -20,6 +20,8 @@ Plug 'zchee/deoplete-jedi', { 'for': 'python' }
 Plug 'davidhalter/jedi-vim', { 'for': 'python' }
 Plug 'neomake/neomake'
 Plug 'tpope/vim-surround'
+Plug 'python/black'
+Plug 'scrooloose/nerdcommenter'
 call plug#end()
 
 " python folding
@@ -66,9 +68,9 @@ inoremap imtis from libronan.python.utils import tis, array2image, tensor2image,
 
 
 
-vmap <C-Space> <Plug>(iron-send-motion)
-imap <C-Space> <Esc><S-v><Plug>(iron-send-motion)
-nmap <C-Space> <S-v><Plug>(iron-send-motion)
+vmap <C-Space> <Plug>(iron-send-motion)<Esc>
+imap <C-Space> <Esc>0<S-v><Plug>(iron-send-motion)<Esc>
+nmap <C-Space> 0<S-v><Plug>(iron-send-motion)<Esc>
 
 function! Vpy()
   let g:iron_repl_open_cmd = 'topleft vertical 100 split'
@@ -118,3 +120,4 @@ function! Ind4()
 endfunction
 command Ind4 call Ind4()
 
+autocmd BufWritePre *.py execute ':Black'

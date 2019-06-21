@@ -88,7 +88,7 @@ def parse_args():
     parser.add_argument('--exclude_nodes', nargs='+', default=[])
     parser.add_argument('--q', action='append', type=lambda kv: kv.split("="), dest='q')
     parser.add_argument('--mem_req', type=int, default=20)
-    parser.add_argument('--h_vmem', type=int, default=100)
+    parser.add_argument('--h_vmem', type=int, default=200000)
     parser.add_argument('--gpus', type=int, default=1)
     parser.add_argument('--cleanup', action='store_true')
     parser.add_argument('--preview', action='store_true')

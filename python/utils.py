@@ -1,5 +1,5 @@
 from itertools import cycle
-
+import math
 from io import BytesIO
 from zipfile import ZipFile
 from copy import copy
@@ -15,8 +15,23 @@ import requests
 from PIL import Image
 from pygame.color import THECOLORS
 
-COLOR_LIST = [list(THECOLORS[x])[:3] for x in
-              ['red', 'yellow', 'blue', 'cyan', 'magenta', 'green', 'gray', 'purple', 'brown', 'turquoise', 'wheat']]
+COLOR_LIST = [
+    list(THECOLORS[x])[:3]
+    for x in [
+        "red",
+        "yellow",
+        "blue",
+        "cyan",
+        "magenta",
+        "green",
+        "gray",
+        "purple",
+        "brown",
+        "turquoise",
+        "wheat",
+    ]
+]
+
 
 def set_seed(seed, gpu):
     random.seed(seed)
@@ -27,7 +42,7 @@ def set_seed(seed, gpu):
 
 def parse_slice(s):
     a_list = []
-    for a in s.split(':'):
+    for a in s.split(":"):
         try:
             a_list.append(int(a))
         except ValueError:
@@ -43,11 +58,11 @@ def write_slice(s):
 
 def write_namespace(s):
     out = []
-    for k,v in vars(s).items():
+    for k, v in vars(s).items():
         if type(v) is not bool or v:
-            out.append('--' + k)
+            out.append("--" + k)
             if type(v) is bool:
-                out.append('\"\"')
+                out.append('""')
             elif type(v) is slice:
                 out.append(write_slice(v))
             else:
@@ -65,55 +80,54 @@ class to_namespace:
 
 def save_args(path, args, zf=None):
     args_copy = copy(args)
-    for k,v in vars(args_copy).items():
+    for k, v in vars(args_copy).items():
         if type(v) is slice:
             vars(args_copy)[k] = write_slice(v)
         elif type(v) is argparse.Namespace:
             vars(args_copy)[k] = write_namespace(v)
     if zf is None:
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             json.dump(vars(args_copy), f, indent=4, sort_keys=True)
     else:
         zf.writestr(
-            str(path).replace('/', '\\'),
-            json.dumps(vars(args_copy), indent=4, sort_keys=True)
+            str(path).replace("/", "\\"),
+            json.dumps(vars(args_copy), indent=4, sort_keys=True),
         )
 
 
 def ptpb(im):
     byteimage = BytesIO()
     try:
-        im.save(byteimage, format='PNG', compress=1)
+        im.save(byteimage, format="PNG", compress=1)
     except AttributeError:
         im.savefig(byteimage)
-    files = {'c': ('foo.png', byteimage.getvalue())}
-    response = requests.post('https://ptpb.pw/', files=files)
+    files = {"c": ("foo.png", byteimage.getvalue())}
+    response = requests.post("https://ptpb.pw/", files=files)
     print(response.content.decode("utf-8"))
 
 
 def image2mask(arr, color_list=COLOR_LIST):
     res = np.zeros(arr.shape[:2])
-    for i,c in enumerate(color_list):
+    for i, c in enumerate(color_list):
         mask = (arr == np.array(c)[:3]).all(axis=2)
         res += (i + 1) * mask
     return res
 
-#start tis
-
 
 def binmask2image(arr, color_list=COLOR_LIST):
     im = np.zeros((arr.shape[1], arr.shape[2], 3))
-    for m,c in zip(arr, cycle([[0,0,0]] + color_list)):
-        im += np.repeat(np.expand_dims(m,axis=-1),3,axis=-1) * np.array(c)
-    return im.astype('uint8')
+    for m, c in zip(arr, cycle([[0, 0, 0]] + color_list)):
+        im += np.repeat(np.expand_dims(m, axis=-1), 3, axis=-1) * np.array(c)
+    return im.astype("uint8")
 
 
 def mask2image(arr, color_list=COLOR_LIST):
     im = np.zeros((*arr.shape, 3))
-    for i,c in enumerate(color_list):
-        im += (np.repeat(np.expand_dims(arr==(i+1), axis=-1), 3, axis=-1)
-               * np.array(c))
-    return im.astype('uint8')
+    for i, c in enumerate(color_list):
+        im += np.repeat(np.expand_dims(arr == (i + 1), axis=-1), 3, axis=-1) * np.array(
+            c
+        )
+    return im.astype("uint8")
 
 
 def process_multi_channel(arr):
@@ -131,28 +145,38 @@ def process_multi_channel(arr):
 def normalize(array):
     u = np.unique(array)
     q1, q3 = np.percentile(u, 25), np.percentile(u, 75)
-    array = (array - (q1 + q3) / 2) / (q3 - q1) / 1.7 # 1.7 scales contrast
+    array = (array - (q1 + q3) / 2) / (q3 - q1) / 1.7  # 1.7 scales contrast
     array = (array * 255 + 127).clip(0, 255)
     return array
 
 
-def array2image(arr, normalize=None):
-    assert len(arr.shape) in [2, 3, 4]
-    if len(arr.shape) == 4:
-        print('array2image: Keeping only the first image of batch')
-        arr = arr[0]
+def _array2image(arr, normalize=None):
+    assert len(arr.shape) in [2, 3]
     if len(arr.shape) == 3:
         arr = process_multi_channel(arr)
     if len(arr.shape) == 2:
-        if arr.dtype is not np.dtype('float'):
+        if arr.dtype is not np.dtype("float"):
             arr = mask2image(arr)
     if normalize is None:
         if arr.max() > 255 or arr.min() < 0:
             arr = normalize(arr)
     elif normalize:
-            arr = normalize(arr)
-    image = Image.fromarray(arr.astype('uint8')).convert('RGB')
+        arr = normalize(arr)
+    image = Image.fromarray(arr.astype("uint8")).convert("RGB")
     return image
+
+
+def array2image(arr, normalize=None):
+    assert len(arr.shape) in [2, 3, 4]
+    if len(arr.shape) != 4:
+        return _array2image(arr, normalize)
+    image_list = [_array2image(a, normalize) for a in arr]
+    n = math.ceil(math.sqrt(len(arr)))
+    array_list = [arr[i : i + n] for i in range(0, len(arr), n)]
+    array_list = [np.concatenate(a, axis=2) for a in array_list]
+    p = array_list[0].shape[-1] - array_list[-1].shape[-1]
+    array_list[-1] = np.pad(array_list[-1], ((0, 0), (0, 0), (0, p)), "minimum")
+    return _array2image(np.concatenate(array_list, axis=1), normalize)
 
 
 def tensor2image(tensor, normalize=None):
@@ -164,13 +188,15 @@ def tensor2image(tensor, normalize=None):
 def to_image_server(im):
     byteimage = BytesIO()
     try:
-        im.save(byteimage, format='PNG', compress=1)
+        im.save(byteimage, format="PNG", compress=1)
     except AttributeError:
         im.savefig(byteimage)
-    image_hash = hashlib.sha256(im.tobytes()).hexdigest()
-    name = f"/meleze/data0/public_html/rriochet/image_server/{image_hash}.png"
+    im_hash = hashlib.sha256(im.tobytes()).hexdigest()
+    name = f"/meleze/data0/public_html/rriochet/image_server/{im_hash}.png"
     im.save(name)
-    print(f"https://www.rocq.inria.fr/cluster-willow/rriochet/image_server/{image_hash}.png")
+    print(
+        f"https://www.rocq.inria.fr/cluster-willow/rriochet/image_server/{im_hash}.png"
+    )
 
 
 def tis(x, normalize=None):
@@ -184,4 +210,3 @@ def tis(x, normalize=None):
         raise ValueError
     to_image_server(im)
     return im
-
