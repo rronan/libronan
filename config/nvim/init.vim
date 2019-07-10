@@ -15,13 +15,14 @@ Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 Plug 'hkupty/iron.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'hynek/vim-python-pep8-indent', {'for': ['python', 'python3']}
-Plug 'sbdchd/neoformat'
 Plug 'zchee/deoplete-jedi', { 'for': 'python' }
 Plug 'davidhalter/jedi-vim', { 'for': 'python' }
 Plug 'neomake/neomake'
 Plug 'tpope/vim-surround'
+Plug 'tpope/vim-unimpaired'
 Plug 'python/black'
 Plug 'scrooloose/nerdcommenter'
+Plug 'fisadev/vim-isort'
 call plug#end()
 
 " python folding
@@ -29,6 +30,20 @@ let g:SimpylFold_docstring_preview = 1
 let g:python_highlight_operators = 0
 let g:python_highlight_space_errors = 0
 let g:python_highlight_all = 1
+
+
+" Run linter on write
+autocmd! BufWritePost * Neomake
+
+" Check code as python3 by default
+let g:neomake_python_python_maker = neomake#makers#ft#python#python()
+let g:neomake_python_flake8_maker = neomake#makers#ft#python#flake8()
+let g:neomake_python_enabled_makers = ['pylint', 'python']
+" let g:neomake_python_python_maker.exe = 'python3 -m py_compile'
+" let g:neomake_python_flake8_maker.exe = 'python3 -m flake8'
+
+" Disable error messages inside the buffer, next to the problematic line
+" let g:neomake_virtualtext_current_error = 0
 
 "split navigations
 nnoremap <C-J> <C-W>j
