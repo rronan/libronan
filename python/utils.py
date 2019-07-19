@@ -150,33 +150,33 @@ def normalize(array):
     return array
 
 
-def _array2image(arr, normalize=None):
+def _array2image(arr, norm=None):
     assert len(arr.shape) in [2, 3]
     if len(arr.shape) == 3:
         arr = process_multi_channel(arr)
     if len(arr.shape) == 2:
         if arr.dtype is not np.dtype("float"):
             arr = mask2image(arr)
-    if normalize is None:
+    if norm is None:
         if arr.max() > 255 or arr.min() < 0:
             arr = normalize(arr)
-    elif normalize:
+    elif norm:
         arr = normalize(arr)
     image = Image.fromarray(arr.astype("uint8")).convert("RGB")
     return image
 
 
-def array2image(arr, normalize=None):
+def array2image(arr, norm=None):
     assert len(arr.shape) in [2, 3, 4]
     if len(arr.shape) != 4:
-        return _array2image(arr, normalize)
-    image_list = [_array2image(a, normalize) for a in arr]
+        return _array2image(arr, norm)
+    image_list = [_array2image(a, norm) for a in arr]
     n = math.ceil(math.sqrt(len(arr)))
     array_list = [arr[i : i + n] for i in range(0, len(arr), n)]
     array_list = [np.concatenate(a, axis=2) for a in array_list]
     p = array_list[0].shape[-1] - array_list[-1].shape[-1]
     array_list[-1] = np.pad(array_list[-1], ((0, 0), (0, 0), (0, p)), "minimum")
-    return _array2image(np.concatenate(array_list, axis=1), normalize)
+    return _array2image(np.concatenate(array_list, axis=1), norm)
 
 
 def tensor2image(tensor, normalize=None):

@@ -97,5 +97,5 @@ class Model(object):
     def output(self):
         raise NotImplementedError
 
-    def __call__(self, x):
-        return self.core_module.forward(x)
+    def __call__(self, *args, **kwargs):
+        return self.core_module.forward(*args, **kwargs)

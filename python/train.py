@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from libronan.python.utils import save_args
 
 
-def make_model(model, args, load, gpu, data_parallel):
+def make_model(model, args, load, gpu, data_parallel=False):
     model = locate(model)(args)
     if load is not None:
         model.load(load)
