@@ -32,6 +32,13 @@ more * | cat
 find . -maxdepth 1 -mtime -0.3 | sort |  xargs -n1 -I% bash -c 'more %'
 ```
 
+copy with relative:
+```
+ rsync -avz -R --rsync-path='cd /sequoia/data1/rriochet/IntPhys-Baselines && rsync' ransac:checkpoints/tests/*/*.txt .
+```
+
+
+
 GPU:
 ```
  ps -ef|grep username
@@ -45,4 +52,7 @@ Run command into tmux:
 ```
 tmux new-session -d -s "myTempSession" /opt/my_script.sh
 ```
+
+
+
 
