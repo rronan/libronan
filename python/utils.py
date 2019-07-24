@@ -1,17 +1,16 @@
-from itertools import cycle
-import math
-from io import BytesIO
-from zipfile import ZipFile
-from copy import copy
-import random
-from collections import defaultdict
-import json
-import hashlib
-
 import argparse
-import torch
+import hashlib
+import json
+import math
+import random
+import re
+import time
+from copy import copy
+from io import BytesIO
+from itertools import cycle
+
 import numpy as np
-import requests
+import torch
 from PIL import Image
 from pygame.color import THECOLORS
 
@@ -78,6 +77,14 @@ class to_namespace:
         return str(vars(self))
 
 
+def append_timestamp(name):
+    if re.search("'[\d]{4}_[\d]{4}'", name):
+        append = ""
+    else:
+        append = "_" + time.strftime("%y%m%d_%H%M%S")
+    return name + append
+
+
 def save_args(path, args, zf=None):
     args_copy = copy(args)
     for k, v in vars(args_copy).items():
@@ -95,15 +102,13 @@ def save_args(path, args, zf=None):
         )
 
 
-def ptpb(im):
-    byteimage = BytesIO()
-    try:
-        im.save(byteimage, format="PNG", compress=1)
-    except AttributeError:
-        im.savefig(byteimage)
-    files = {"c": ("foo.png", byteimage.getvalue())}
-    response = requests.post("https://ptpb.pw/", files=files)
-    print(response.content.decode("utf-8"))
+def fill_index_select(t_a, dim, i_list, t_b):
+    t_list = []
+    for i in range(t_a.size(dim)):
+        idx = torch.LongTensor([i])
+        t = t_b.index_select(dim, idx) if i in i_list else t_a.index_select(dim, idx)
+        t_list.append(t)
+    return torch.cat(t_list, dim)
 
 
 def image2mask(arr, color_list=COLOR_LIST):
