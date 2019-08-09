@@ -1,0 +1,91 @@
+#!/bin/bash
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -o|--outdir)
+    OUTDIR="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -q|--queue)
+    QUEUE="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --mem_req)
+    MEM_REQ="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --h_vmem)
+    H_VMEM="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --pe)
+    PE="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --default)
+    DEFAULT=YES
+    shift # past argument
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+if [ -z $OUTDIR ]
+then
+    OUTDIR=/sequoia/data1/rriochet/logs
+fi
+
+if [ -z $QUEUE ]
+then
+    QUEUE="all.q"
+fi
+
+if [ -z $MEM_REQ ]
+then
+    MEM_REQ=8
+fi
+
+if [ -z $H_VMEM ]
+then
+    H_VMEM=128
+fi
+
+if [ -z $PE ]
+then
+    PE=1
+fi
+TIMESTAMP=$(date "+%y%m%d_%H%M%S")
+COUNT=0
+INPUT="${1:-/dev/stdin}"
+
+echo OUTDIR $OUTDIR
+echo QUEUE $QUEUE
+echo MEM_REQ $MEM_REQ
+echo H_VMEM $H_VMEM
+echo PE $PE
+echo $TIMESTAMP
+
+while read CMD; do
+    COUNT=$((COUNT+1))
+    qsub -q $QUEUE -pe serial $PE -l mem_req="$MEM_REQ"G,h_vmem="$H_VMEM"G -o $OUTDIR -e $OUTDIR -N $( printf '_%s_job%03d' $TIMESTAMP $COUNT ) << EOM
+#!/bin/bash
+source ~/.bashrc
+export MKL_NUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+export OMP_NUM_THREADS=1
+$CMD
+EOM
+done < "$INPUT"
