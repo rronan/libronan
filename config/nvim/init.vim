@@ -35,17 +35,11 @@ let g:python_highlight_all = 1
 " Run linter on write
 autocmd! BufWritePost * Neomake
 
-" Check code as python3 by default
 let g:neomake_python_python_maker = neomake#makers#ft#python#python()
 let g:neomake_python_flake8_maker = neomake#makers#ft#python#flake8()
 let g:neomake_python_enabled_makers = ['pylint', 'python']
-" let g:neomake_python_python_maker.exe = 'python3 -m py_compile'
-" let g:neomake_python_flake8_maker.exe = 'python3 -m flake8'
 
-" Disable error messages inside the buffer, next to the problematic line
-" let g:neomake_virtualtext_current_error = 0
-
-"split navigations
+" split navigations
 nnoremap <C-J> <C-W>j
 nnoremap <C-K> <C-W>k
 nnoremap <C-L> <C-W>l
@@ -136,3 +130,5 @@ endfunction
 command Ind4 call Ind4()
 
 autocmd BufWritePre *.py execute ':Black'
+
+command Mail e term:///sequoia/data1/rriochet/bin/mutt

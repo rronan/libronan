@@ -1,9 +1,9 @@
 let g:netrw_dirhistmax  =10
 let g:netrw_dirhist_cnt =7
-let g:netrw_dirhist_1='/home/local/rriochet/arteror/src/object_detection/utils'
-let g:netrw_dirhist_2='/home/local/rriochet/milvor/predictor/docker_classifior'
-let g:netrw_dirhist_3='/home/local/rriochet/milvor/predictor/docker_classifior/src'
-let g:netrw_dirhist_4='/home/local/rriochet/milvor/predictor/docker_detector'
-let g:netrw_dirhist_5='/home/local/rriochet/milvor/predictor/docker_angulator'
-let g:netrw_dirhist_6='/home/local/rriochet/milvor/predictor/docker_classifior'
-let g:netrw_dirhist_7='/home/local/rriochet/milvor/predictor/docker_classifior/src'
+let g:netrw_dirhist_1='/nfs/sequoia_data1/rriochet/IntPhys-Baselines'
+let g:netrw_dirhist_2='/nfs/sequoia_data1/rriochet/IntPhys-Baselines/checkpoints'
+let g:netrw_dirhist_3='/nfs/sequoia_data1/rriochet/IntPhys-Baselines/checkpoints/tests'
+let g:netrw_dirhist_4='/nfs/sequoia_data1/rriochet/physics_pymunk'
+let g:netrw_dirhist_5='/nfs/sequoia_data1/rriochet'
+let g:netrw_dirhist_6='/nfs/sequoia_data1/rriochet/physics_pybullet'
+let g:netrw_dirhist_7='/nas/home2/r/rriochet/.mutt'

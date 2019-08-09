@@ -18,7 +18,6 @@ COLOR_LIST = [
     list(THECOLORS[x])[:3]
     for x in [
         "red",
-        "yellow",
         "blue",
         "cyan",
         "magenta",
@@ -26,6 +25,7 @@ COLOR_LIST = [
         "gray",
         "purple",
         "brown",
+        "yellow",
         "turquoise",
         "wheat",
     ]
@@ -103,9 +103,12 @@ def save_args(path, args, zf=None):
 
 
 def fill_index_select(t_a, dim, i_list, t_b):
+    assert t_a.is_cuda == t_b.is_cuda
     t_list = []
     for i in range(t_a.size(dim)):
         idx = torch.LongTensor([i])
+        if t_a.is_cuda:
+            idx = idx.cuda()
         t = t_b.index_select(dim, idx) if i in i_list else t_a.index_select(dim, idx)
         t_list.append(t)
     return torch.cat(t_list, dim)
