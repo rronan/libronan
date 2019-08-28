@@ -1,4 +1,5 @@
 from pydoc import locate
+import numpy as np
 import json
 
 from tqdm import tqdm
@@ -40,6 +41,21 @@ def process_batch(model, batch, loss, set_, j):
         except KeyError:
             loss[key] = value
     return loss
+
+
+class RollingStatistic(object):
+    def __init__(self, window_size, average, variance):
+        self.N = window_size
+        self.average = average
+        self.variance = variance
+        self.stddev = np.sqrt(variance)
+
+    def update(self, new, old):
+        oldavg = self.average
+        newavg = oldavg + (new - old) / self.N
+        self.average = newavg
+        self.variance += (new - old) * (new - newavg + old - oldavg) / (self.N - 1)
+        self.stddev = np.sqrt(self.variance)
 
 
 def process_epoch(model, set_, loader, log, i, n, callback=None, verbose=True):

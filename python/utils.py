@@ -12,11 +12,11 @@ from itertools import cycle
 import numpy as np
 import torch
 from PIL import Image
-from pygame.color import THECOLORS
+from colour import Color
 
 COLOR_LIST = [
-    list(THECOLORS[x])[:3]
-    for x in [
+    [int(c * 255) for c in Color(name).rgb][:3]
+    for name in [
         "red",
         "blue",
         "cyan",
@@ -28,6 +28,21 @@ COLOR_LIST = [
         "yellow",
         "turquoise",
         "wheat",
+        "lightsalmon",
+        "firebrick",
+        "palevioletred",
+        "darkkhaki",
+        "thistle",
+        "darkblue",
+        "navy",
+        "cornsilk",
+        "sandybrown",
+        "goldenrod",
+        "azure",
+        "beige",
+        "oldlace",
+        "slategray",
+        "springgreen",
     ]
 ]
 
@@ -150,7 +165,8 @@ def process_multi_channel(arr):
         return binmask2image(arr)
 
 
-def normalize(array):
+def _normalize(array):
+    array = array.copy()
     u = np.unique(array)
     q1, q3 = np.percentile(u, 25), np.percentile(u, 75)
     array = (array - (q1 + q3) / 2) / (q3 - q1) / 1.7  # 1.7 scales contrast
@@ -158,33 +174,32 @@ def normalize(array):
     return array
 
 
-def _array2image(arr, norm=None):
+def _array2image(arr, normalize=None):
     assert len(arr.shape) in [2, 3]
     if len(arr.shape) == 3:
         arr = process_multi_channel(arr)
     if len(arr.shape) == 2:
-        if arr.dtype is not np.dtype("float"):
+        if arr.dtype is not np.dtype("float32"):
             arr = mask2image(arr)
-    if norm is None:
+    if normalize is None:
         if arr.max() > 255 or arr.min() < 0:
-            arr = normalize(arr)
-    elif norm:
+            arr = _normalize(arr)
+    elif normalize:
         arr = normalize(arr)
     image = Image.fromarray(arr.astype("uint8")).convert("RGB")
     return image
 
 
-def array2image(arr, norm=None):
+def array2image(arr, normalize=None):
     assert len(arr.shape) in [2, 3, 4]
     if len(arr.shape) != 4:
-        return _array2image(arr, norm)
-    image_list = [_array2image(a, norm) for a in arr]
+        return _array2image(arr, normalize)
     n = math.ceil(math.sqrt(len(arr)))
     array_list = [arr[i : i + n] for i in range(0, len(arr), n)]
     array_list = [np.concatenate(a, axis=2) for a in array_list]
     p = array_list[0].shape[-1] - array_list[-1].shape[-1]
     array_list[-1] = np.pad(array_list[-1], ((0, 0), (0, 0), (0, p)), "minimum")
-    return _array2image(np.concatenate(array_list, axis=1), norm)
+    return _array2image(np.concatenate(array_list, axis=1), normalize)
 
 
 def tensor2image(tensor, normalize=None):

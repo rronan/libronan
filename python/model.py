@@ -3,16 +3,24 @@ from collections import OrderedDict
 import torch
 import torch.optim as optim
 from torch import nn
+from torch.nn.utils import clip_grad_norm_
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchviz import make_dot, make_dot_from_trace
+
+
+class dummy_scheduler:
+    def step(*args, **kwargs):
+        return None
 
 
 class Model(object):
     def __init__(self):
         super().__init__()
-        __name__ = "model"
+        self.__name__ = "model"
         self.is_gpu = False
         self.is_data_parallel = False
+        self.optimizer = None
+        self.scheduler = dummy_scheduler
 
     def set_optim(self, args):
         self.grad_clip = args.grad_clip
@@ -30,8 +38,8 @@ class Model(object):
     def update(self, loss):
         self.core_module.zero_grad()
         loss.backward()
-        if self.grad_clip:
-            clip_grad_norm_(self.core_module.parameters, self.grad_clip)
+        if self.grad_clip is not None:
+            clip_grad_norm_(self.core_module.parameters(), self.grad_clip)
         self.optimizer.step()
 
     def step(self, batch, set_):
@@ -75,7 +83,10 @@ class Model(object):
         self.is_data_parallel = True
 
     def get_lr(self):
-        return self.optimizer.param_groups[0]["lr"]
+        if self.optimizer is not None:
+            return self.optimizer.param_groups[0]["lr"]
+        else:
+            return 0
 
     def get_num_parameters(self):
         return sum([m.numel() for m in self.core_module.parameters()])

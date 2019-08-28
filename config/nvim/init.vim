@@ -21,9 +21,17 @@ Plug 'neomake/neomake'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'python/black'
-Plug 'scrooloose/nerdcommenter'
+Plug 'tpope/vim-commentary'
 Plug 'fisadev/vim-isort'
+Plug 'heavenshell/vim-pydocstring'
+Plug 'haya14busa/incsearch.vim'
+Plug 'yuttie/comfortable-motion.vim'
+Plug 'scrooloose/nerdtree'
+Plug 'mileszs/ack.vim'
+Plug 'tpope/vim-sensible'
 call plug#end()
+
+"Plug 'scrooloose/nerdcommenter'
 
 " python folding
 let g:SimpylFold_docstring_preview = 1
@@ -57,7 +65,7 @@ inoremap <M-k> <Up>
 inoremap <M-h> <Left>
 inoremap <M-l> <Right>
 inoremap <M-a> <CR>
-inoremap jk <Esc>
+inoremap JK <Esc>
 tnoremap <C-J> <C-\><C-n><C-W>j
 tnoremap <C-K> <C-\><C-n><C-W>k
 tnoremap <C-L> <C-\><C-n><C-W>l
@@ -65,6 +73,8 @@ tnoremap <C-H> <C-\><C-n><C-W>h
 tnoremap <C-Q> <C-\><C-n>:q<CR>
 inoremap <C-Z> <C-\><C-n><C-Z>
 tnoremap <Esc> <C-\><C-n>
+inoremap JK <C-\><C-n>
+tnoremap JK <C-\><C-n>
 inoremap jk <C-\><C-n>
 tnoremap jk <C-\><C-n>
 tnoremap <C-D> <Nop>
@@ -75,11 +85,11 @@ inoremap ipdb import IPython; IPython.embed()
 nnoremap imtis ofrom libronan.python.utils import tis, array2image, tensor2image, mask2image<Esc>
 inoremap imtis from libronan.python.utils import tis, array2image, tensor2image, mask2image
 
-
-
 vmap <C-Space> <Plug>(iron-send-motion)<Esc>
 imap <C-Space> <Esc>0<S-v><Plug>(iron-send-motion)<Esc>
 nmap <C-Space> 0<S-v><Plug>(iron-send-motion)<Esc>
+
+nmap <silent> <M-j> <Plug>(pydocstring)
 
 function! Vpy()
   let g:iron_repl_open_cmd = 'topleft vertical 100 split'
@@ -132,3 +142,18 @@ command Ind4 call Ind4()
 autocmd BufWritePre *.py execute ':Black'
 
 command Mail e term:///sequoia/data1/rriochet/bin/mutt
+
+if filereadable(expand("~/.vimrc_background"))
+  let base16colorspace=256
+  source ~/.vimrc_background
+endif
+
+let g:comfortable_motion_scroll_down_key = "j"
+let g:comfortable_motion_scroll_up_key = "k"
+nnoremap <silent> <C-d> :call comfortable_motion#flick(g:comfortable_motion_imp    ulse_multiplier * winheight(0) * 2)<CR>
+nnoremap <silent> <C-u> :call comfortable_motion#flick(g:comfortable_motion_imp    ulse_multiplier * winheight(0) * -2)<CR>
+nnoremap <silent> <C-f> :call comfortable_motion#flick(g:comfortable_motion_imp    ulse_multiplier * winheight(0) * 4)<CR>
+nnoremap <silent> <C-b> :call comfortable_motion#flick(g:comfortable_motion_imp    ulse_multiplier * winheight(0) * -4)<CR>
+
+nmap " :NERDTreeToggle<CR>
+
