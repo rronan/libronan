@@ -11,8 +11,6 @@ call plug#begin()
 Plug 'vim-airline/vim-airline'
 Plug 'sjl/badwolf'
 Plug 'roxma/nvim-completion-manager'
-Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
 Plug 'hkupty/iron.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'hynek/vim-python-pep8-indent', {'for': ['python', 'python3']}
 Plug 'zchee/deoplete-jedi', { 'for': 'python' }

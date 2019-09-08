@@ -1,3 +1,4 @@
+import math
 from pydoc import locate
 import numpy as np
 import json
@@ -66,7 +67,7 @@ def process_epoch(model, set_, loader, log, i, n, callback=None, verbose=True):
         if verbose:
             pbar.set_description(
                 f"{set_} {i}/{n - 1}, "
-                + " | ".join(f"{k}: {v:.4e}" for k, v in loss.items())
+                + " | ".join(f"{k}: {v:.3e}" for k, v in loss.items())
             )
         else:
             pbar.set_description(f"{set_} {i}/{n - 1}")
@@ -88,7 +89,7 @@ def train(model, loader_dict, n_epochs, checkpoint_func, subcheck=None, verbose=
         checkpoint_func(f"{i:03d}", log)
         print(log[i])
         model.scheduler.step(log[-1]["val_loss"])
-        if model.get_lr() < 5e-9:
+        if model.get_lr() < 5e-9 or math.isnan(log[-1]["train_loss"]):
             break
 
 
