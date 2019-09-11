@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 import torch
 import torch.optim as optim
 from torch import nn
@@ -24,8 +22,13 @@ class Model(object):
 
     def set_optim(self, args):
         self.grad_clip = args.grad_clip
-        self.optimizer = vars(optim)[args.optimizer](
-            self.core_module.parameters(), lr=args.lr, weight_decay=args.weight_decay
+        kwargs = {}
+        if args.lr is not None:
+            kwargs["lr"] = args.lr
+        if args.weight_decay is not None:
+            kwargs["weight_decay"] = args.weight_decay
+        self.optimizer = getattr(optim, args.optimizer)(
+            self.core_module.parameters(), **kwargs
         )
         self.scheduler = ReduceLROnPlateau(
             self.optimizer,

@@ -2,6 +2,7 @@ import math
 from pydoc import locate
 import numpy as np
 import json
+import time
 
 from tqdm import tqdm
 from torch.utils.data import DataLoader
@@ -82,10 +83,12 @@ def train(model, loader_dict, n_epochs, checkpoint_func, subcheck=None, verbose=
     callback = (checkpoint_func, subcheck) if subcheck is not None else None
     log = []
     for i in range(n_epochs):
+        t0 = time.time()
         log.append({"epoch": i})
         for set_, loader in loader_dict.items():
             process_epoch(model, set_, loader, log, i, n_epochs, callback, verbose)
         log[i]["lr"] = model.get_lr()
+        log["time"] = time.strftime("%H:%M:%S", time.gmtime(t0 - time.time()))
         checkpoint_func(f"{i:03d}", log)
         print(log[i])
         model.scheduler.step(log[-1]["val_loss"])
