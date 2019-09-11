@@ -1,4 +1,5 @@
 import argparse
+from functools import wraps
 import hashlib
 import json
 import math
@@ -11,8 +12,8 @@ from itertools import cycle
 
 import numpy as np
 import torch
-from PIL import Image
 from colour import Color
+from PIL import Image
 
 COLOR_LIST = [
     [int(c * 255) for c in Color(name).rgb][:3]
@@ -45,6 +46,24 @@ COLOR_LIST = [
         "springgreen",
     ]
 ]
+
+
+def mp_cache(mp_dict):
+    def decorate(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            k = func.__name__
+            k += "_".join(map(str, args))
+            k += "_".join(map(lambda k, v: f"{k}_{v}", kwargs.items()))
+            if k in mp_dict:
+                return mp_dict[k]
+            res = func(self, *args, **kwargs)
+            mp_dict[k] = res
+            return res
+
+        return wrapper
+
+    return decorate
 
 
 def set_seed(seed, gpu):
