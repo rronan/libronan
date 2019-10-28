@@ -29,7 +29,25 @@ Plug 'mileszs/ack.vim'
 Plug 'tpope/vim-sensible'
 call plug#end()
 
-"Plug 'scrooloose/nerdcommenter'
+
+" Some basics:
+	nnoremap c "_c
+	set nocompatible
+	filetype plugin on
+	syntax on
+	set encoding=utf-8
+	set number relativenumber
+" Enable autocompletion:
+	set wildmode=longest,list,full
+" Disables automatic commenting on newline:
+	autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+
+" Goyo plugin makes text more readable when writing prose:
+	map <leader>f :Goyo \| set bg=light \| set linebreak<CR>
+
+" Splits open at the bottom and right, which is non-retarded, unlike vim defaults.
+	set splitbelow splitright
+
 
 " python folding
 let g:SimpylFold_docstring_preview = 1
@@ -41,9 +59,24 @@ let g:python_highlight_all = 1
 " Run linter on write
 autocmd! BufWritePost * Neomake
 
-let g:neomake_python_python_maker = neomake#makers#ft#python#python()
-let g:neomake_python_flake8_maker = neomake#makers#ft#python#flake8()
-let g:neomake_python_enabled_makers = ['pylint', 'python']
+"let g:neomake_python_python_maker = neomake#makers#ft#python#python()
+"let g:neomake_python_flake8_maker = neomake#makers#ft#python#flake8()
+"let g:neomake_python_pylint_maker = {
+"  \ 'args': [
+"  \ '-d', 'W503,E203',
+"  \ '-f', 'text',
+"  \ '--msg-template="{path}:{line}:{column}:{C}: [{symbol}] {msg}"',
+"  \ '-r', 'n'
+"  \ ],
+"  \ 'errorformat':
+"  \ '%A%f:%l:%c:%t: %m,' .
+"  \ '%A%f:%l: %m,' .
+"  \ '%A%f:(%l): %m,' .
+"  \ '%-Z%p^%.%#,' .
+"  \ '%-G%.%#',
+"  \ }
+"let g:neomake_python_enabled_makers = ['pylint', 'python']
+let g:neomake_python_enabled_makers = ['pyflakes']
 
 " split navigations
 nnoremap <C-J> <C-W>j
@@ -76,8 +109,8 @@ tnoremap JK <C-\><C-n>
 inoremap jk <C-\><C-n>
 tnoremap jk <C-\><C-n>
 tnoremap <C-D> <Nop>
-nnoremap pdb oimport pdb; pdb.set_trace()<Esc>
-inoremap pdb import pdb; pdb.set_trace()
+nnoremap pdb o__import__("pdb").set_trace()<Esc>
+inoremap pdb __import__("pdb").set_trace()
 nnoremap ipdb oimport IPython; IPython.embed()<Esc>
 inoremap ipdb import IPython; IPython.embed()
 nnoremap imtis ofrom libronan.python.utils import tis, array2image, tensor2image, mask2image<Esc>
