@@ -1,5 +1,4 @@
 import math
-from pydoc import locate
 import numpy as np
 import json
 import time
@@ -12,7 +11,7 @@ from libronan.python.utils import save_args
 
 
 def make_model(model, args, load=None, gpu=False, data_parallel=False):
-    model = locate(model)(args)
+    model = __import__(model)(args)
     if load is not None:
         model.load(load)
     if gpu:
@@ -24,7 +23,7 @@ def make_model(model, args, load=None, gpu=False, data_parallel=False):
 
 
 def make_loader(dataset, args, set_, bsz, num_workers, pin_memory, shuffle=True):
-    dataset = locate(dataset)(args, set_)
+    dataset = __import__(dataset)(args, set_)
     loader = DataLoader(
         dataset,
         bsz,
@@ -80,7 +79,7 @@ def process_epoch(model, set_, loader, log, i, n, callback=None, verbose=True):
     return log
 
 
-def train(model, loader_dict, n_epochs, checkpoint_func, subcheck=None, verbose=True):
+def trainer(model, loader_dict, n_epochs, checkpoint_func, subcheck=None, verbose=True):
     callback = (checkpoint_func, subcheck) if subcheck is not None else None
     log = []
     for i in range(n_epochs):

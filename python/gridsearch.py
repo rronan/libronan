@@ -8,15 +8,16 @@ from dask.distributed import Client
 
 from dask_jobqueue import SGECluster
 
+# dask-submit <remote-client-address>:<port> gridsearch.py
+
 
 def init_cluster(args):
-    resource_spec = f"h_vmem={args.h_vmem},mem_req={args.mem_req}"
     cluster = SGECluster(
         queue=args.queue,
         cores=1,
         processes=1,
         memory="16GB",
-        resource_spec=resource_spec,
+        resource_spec=f"h_vmem={args.h_vmem},mem_req={args.mem_req}",
         interface="ib0",
     )
     cluster.scale(jobs=args.jobs)
@@ -35,15 +36,14 @@ def make_args_list(params, name):
             res.append(opt)
 
 
-def run(args):
+def submit(args):
     with open(args.sweep_path, "r") as f:
         params = yaml.load(f)
     func = __import__(params["function"])
     client = init_cluster(args)
     args_list = make_args_list(params, args.name)
-    fut_list = [client.submit(func, opt) for opt in args_list]
-    for fut in fut_list:
-        fut.results()
+    future_list = [client.submit(func, opt) for opt in args_list]
+    return future_list
 
 
 def parse_args():
@@ -62,4 +62,4 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     print(args)
-    run(args)
+    submit(args)
