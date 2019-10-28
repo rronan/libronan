@@ -4,13 +4,14 @@ import numpy as np
 import json
 import time
 
+from path import Path
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 from libronan.python.utils import save_args
 
 
-def make_model(model, args, load, gpu, data_parallel=False):
+def make_model(model, args, load=None, gpu=False, data_parallel=False):
     model = locate(model)(args)
     if load is not None:
         model.load(load)
@@ -92,20 +93,22 @@ def train(model, loader_dict, n_epochs, checkpoint_func, subcheck=None, verbose=
         checkpoint_func(f"{i:03d}", log)
         print(log[i])
         model.scheduler.step(log[-1]["val_loss"])
-        if model.get_lr() < 5e-9 or math.isnan(log[-1]["train_loss"]):
+        if model.get_lr() < 5e-8 or math.isnan(log[-1]["train_loss"]):
             break
 
 
-def checkpoint(epoch, log, model=None, args=None):
-    args.checkpoint.mkdir_p()
+def checkpoint(epoch, log, model=None, args=None, path=None):
+    if path is None:
+        path = Path(args.checkpoint)
+    path.mkdir_p()
     if args is not None:
-        save_args(args.checkpoint / "args.json", args)
-    with open(args.checkpoint / "log.json", "w") as f:
+        save_args(path / "args.json", args)
+    with open(path / "log.json", "w") as f:
         json.dump(log, f, indent=4)
     if args.save_all:
-        model.save(args.checkpoint, epoch)
+        model.save(path, epoch)
     if args.save_last:
-        model.save(args.checkpoint, "last")
+        model.save(path, "last")
     if "val_loss" in log[-1]:
         if log[-1]["val_loss"] == min([x["val_loss"] for x in log]):
-            model.save(args.checkpoint, "best")
+            model.save(path, "best")

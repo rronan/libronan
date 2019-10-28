@@ -40,7 +40,7 @@ def run(args):
                         "#!/bin/bash",
                         args.shell_intro,
                         exclude_nodes,
-                        "export PYTHONPATH='/sequoia/data1/rriochet:'",
+                        "export PYTHONPATH=$PYTHONPATH':/sequoia/data1/rriochet'",
                         "export MKL_NUM_THREADS=1",
                         "export NUMEXPR_NUM_THREADS=1",
                         "export OMP_NUM_THREADS=1",

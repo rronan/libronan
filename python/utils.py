@@ -18,19 +18,20 @@ from PIL import Image
 COLOR_LIST = [
     [int(c * 255) for c in Color(name).rgb][:3]
     for name in [
-        "red",
+        "yellow",
+        "orange",
+        "turquoise",
         "blue",
-        "cyan",
-        "magenta",
+        "firebrick",
+        "red",
         "green",
         "gray",
-        "purple",
+        "magenta",
         "brown",
-        "yellow",
-        "turquoise",
+        "cyan",
+        "purple",
         "wheat",
         "lightsalmon",
-        "firebrick",
         "palevioletred",
         "darkkhaki",
         "thistle",
@@ -51,19 +52,45 @@ COLOR_LIST = [
 def mp_cache(mp_dict):
     def decorate(func):
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(*args, **kwargs):
             k = func.__name__
             k += "_".join(map(str, args))
             k += "_".join(map(lambda k, v: f"{k}_{v}", kwargs.items()))
             if k in mp_dict:
                 return mp_dict[k]
-            res = func(self, *args, **kwargs)
+            res = func(*args, **kwargs)
             mp_dict[k] = res
             return res
 
         return wrapper
 
     return decorate
+
+
+def split_sum(data, split_sections):
+    num_segments = len(split_sections)
+    segment_ids = sum(([k] * l for k, l in enumerate(split_sections)), [])
+    return unsorted_segment_sum(data, segment_ids, num_segments)
+
+
+def segment_sum(data, segment_ids):
+    num_segments = len(torch.unique(segment_ids))
+    return unsorted_segment_sum(data, segment_ids, num_segments)
+
+
+# https://gist.github.com/bbrighttaer/207dc03b178bbd0fef8d1c0c1390d4be
+
+
+def unsorted_segment_sum(data, segment_ids, num_segments):
+    if len(segment_ids.shape) == 1:
+        s = torch.prod(torch.tensor(data.shape[1:])).long()
+        segment_ids = segment_ids.repeat_interleave(s).view(
+            segment_ids.shape[0], *data.shape[1:]
+        )
+    shape = [num_segments] + list(data.shape[1:])
+    tensor = torch.zeros(*shape).scatter_add(0, segment_ids, data.float())
+    tensor = tensor.type(data.dtype)
+    return tensor
 
 
 def set_seed(seed, gpu):
@@ -112,7 +139,7 @@ class to_namespace:
 
 
 def append_timestamp(name):
-    if re.search("'[\d]{4}_[\d]{4}'", name):
+    if re.search("[\d]{6}_[\d]{6}", name):
         append = ""
     else:
         append = "_" + time.strftime("%y%m%d_%H%M%S")
@@ -201,8 +228,8 @@ def _array2image(arr, normalize=None):
         if arr.dtype is not np.dtype("float32"):
             arr = mask2image(arr)
     if normalize is None:
-        if arr.max() > 255 or arr.min() < 0:
-            arr = _normalize(arr)
+        # if arr.max() > 255 or arr.min() < 0:
+        arr = _normalize(arr)
     elif normalize:
         arr = normalize(arr)
     image = Image.fromarray(arr.astype("uint8")).convert("RGB")
@@ -214,6 +241,12 @@ def array2image(arr, normalize=None):
     if len(arr.shape) != 4:
         return _array2image(arr, normalize)
     n = math.ceil(math.sqrt(len(arr)))
+    arr = np.pad(
+        arr,
+        ((0, 0), (0, 0), (5, 5), (5, 5)),
+        "constant",
+        constant_values=len(COLOR_LIST) - 1,
+    )
     array_list = [arr[i : i + n] for i in range(0, len(arr), n)]
     array_list = [np.concatenate(a, axis=2) for a in array_list]
     p = array_list[0].shape[-1] - array_list[-1].shape[-1]
@@ -241,7 +274,7 @@ def to_image_server(im):
     )
 
 
-def tis(x, normalize=None):
+def ti(x, normalize=None):
     if type(x) is torch.Tensor:
         im = tensor2image(x, normalize)
     elif type(x) is np.ndarray:
@@ -250,5 +283,34 @@ def tis(x, normalize=None):
         im = x
     else:
         raise ValueError
+    return im
+
+
+def tis(x, normalize=None):
+    im = ti(x, normalize)
     to_image_server(im)
     return im
+
+
+def load_from_keras(self, h5_path):
+    import h5py
+
+    print("loading weights from %s" % h5_path)
+    f = h5py.File(h5_path)
+    k = 1
+    numel = 0
+    for m in self.modules():
+        if isinstance(m, nn.Conv2d):
+            w = f["model_weights"]["conv2d_%d" % k]["conv2d_%d" % k]
+            m.weight.data.copy_(
+                torch.FloatTensor(w["kernel:0"].value).permute(3, 2, 0, 1)
+            )
+            m.bias.data.copy_(torch.FloatTensor(w["bias:0"].value))
+            numel += m.weight.data.numel()
+            numel += m.bias.data.numel()
+            k += 1
+    try:
+        w = f["model_weights"]["conv2d_%d" % k]["conv2d_%d" % k]["kernel:0"]
+        print("test failed: ", w.value)
+    except:
+        print("success, number of parameters copied: %d" % numel)

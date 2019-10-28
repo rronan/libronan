@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import torch
 import torch.optim as optim
 from torch import nn
@@ -14,8 +15,7 @@ class dummy_scheduler:
 class Model(object):
     def __init__(self):
         super().__init__()
-        self.__name__ = "model"
-        self.is_gpu = False
+        self.device = "cpu"
         self.is_data_parallel = False
         self.optimizer = None
         self.scheduler = dummy_scheduler
@@ -46,10 +46,7 @@ class Model(object):
         self.optimizer.step()
 
     def step(self, batch, set_):
-        x, y = batch[0], batch[1]
-        if self.is_gpu:
-            x = x.cuda()
-            y = y.cuda()
+        x, y = batch[0].to(self.device), batch[1].to(self.device)
         pred = self.core_module(x)
         loss = self.loss.forward(pred, y)
         if set_ == "train":
@@ -69,7 +66,7 @@ class Model(object):
             self.core_module.load_state_dict(state_dict)
 
     def save(self, path, epoch):
-        with open(path / f"{self.__name__}.txt", "w") as f:
+        with open(path / f"{self.__class__.__name__}.txt", "w") as f:
             f.write(str(self))
         if self.is_data_parallel:
             state_dict = self.core_module.module.state_dict()
@@ -77,9 +74,13 @@ class Model(object):
             state_dict = self.core_module.state_dict()
         torch.save(state_dict, path / f"weights_{epoch}.pth")
 
+    def to_device(self, batch):
+        return [b.to(self.device) for b in batch]
+
     def gpu(self):
         self.core_module.cuda()
-        self.is_gpu = True
+        self.core_module.device = "cuda"
+        self.device = "cuda"
 
     def data_parallel(self):
         self.core_module = nn.DataParallel(self.core_module)
@@ -95,14 +96,10 @@ class Model(object):
         return sum([m.numel() for m in self.core_module.parameters()])
 
     def make_dot(self, *x):
-        if self.is_gpu:
-            x = [xx.cuda() for xx in x]
         dot = make_dot(self(*x), params=dict(self.core_module.named_parameters()))
         dot.render("dot", view=False)
 
     def make_dot_from_trace(self, *x):
-        if self.is_gpu:
-            x = [xx.cuda() for xx in x]
         with torch.onnx.set_training(self.core_module, False):
             trace, _ = torch.jit.get_trace_graph(self.core_module, args=(*x,))
         dot = make_dot_from_trace(trace)
