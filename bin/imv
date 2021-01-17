@@ -1,0 +1,15 @@
+#/bin/bash
+
+#
+# Usage: `imv path1.to.funcA path2.to.funcB **/*.py`
+#
+
+SRC="$1"
+DEST="$2"
+FILES="$3"
+
+isort -sl "$FILES"
+
+sed -i '' 's/from ${SRC%.*} import ${SRC##*:}/from ${DEST%.*} import ${DEST##*:}/g' "$FILES"
+
+isort "$FILES"
