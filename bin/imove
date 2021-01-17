@@ -1,7 +1,7 @@
 #/bin/bash
 
 #
-# Usage: `imv path1.to.varA path2.to.varB files`
+# Usage: `imove path1.to.varA path2.to.varB files`
 # 
 # Example: `imove imagor.image.custom_warp_affine imagor.transforms.custom_warp_affine **/*.py`
 #
