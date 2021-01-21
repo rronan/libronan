@@ -1,3 +1,0 @@
-#!/bin/bash
-source ~/.private/mutt
-/usr/bin/mutt
