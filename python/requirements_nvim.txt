@@ -1,9 +1,0 @@
-black
-flake8
-jedi
-isort
-neovim
-pep8
-pyflakes
-pylint
-pynvim

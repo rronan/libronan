@@ -1,9 +1,0 @@
-path.py
-tqdm
-matplotlib
-Pillow
-opencv-python
-pygame
-jupyter
-pybullet
-torchviz
