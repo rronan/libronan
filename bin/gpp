@@ -1,0 +1,11 @@
+
+if [ -n "$1" ]
+then
+    MESSAGE="$1"
+else
+    MESSAGE="WIP"
+fi
+git commit -m "$MESSAGE"
+git pull --all --prune --rebase
+git push
+
