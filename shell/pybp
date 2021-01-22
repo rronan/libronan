@@ -1,6 +1,6 @@
 #!/bin/zsh
 IFS=$'\n'       # make newlines the only separator
 set -f          # disable globbing
-alias vim=$EDITOR
+[ ! -z "$EDITOR" ] && alias vim=$EDITOR           # if #EDITOR is defined, use it instead of raw vim (e.g. nvim)
 
 select v in $( cat /tmp/python.breakpoints ); do eval "$v"; exit; done
