@@ -2,12 +2,6 @@
 ls | xargs -n1 -I% bash -c "echo %"
 ```
 
-range in bash
-
-```
-(for i in {0..199}; do echo $i; done) | xargs -n1 -I% bash -c 'echo $((%*10)):$((%*10+10))'
-```
-
 Read symlink value:
 ```
 readlink -f /root/Public/myothertextfile.txt
@@ -52,7 +46,3 @@ Run command into tmux:
 ```
 tmux new-session -d -s "myTempSession" /opt/my_script.sh
 ```
-
-
-
-
