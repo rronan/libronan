@@ -1,5 +1,5 @@
 # libronan
 
 ```
-bash make_symlink.sh
+source environ.sh
 ```
