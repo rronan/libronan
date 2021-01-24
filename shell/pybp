@@ -1,4 +1,5 @@
 #!/bin/zsh
+
 IFS=$'\n'       # make newlines the only separator
 set -f          # disable globbing
 [ ! -z "$EDITOR" ] && alias vim=$EDITOR           # if #EDITOR is defined, use it instead of raw vim (e.g. nvim)
