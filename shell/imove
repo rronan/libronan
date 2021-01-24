@@ -10,8 +10,7 @@ SRC="$1"
 DEST="$2"
 FILES="$3"
 
-isort -sl "$FILES"
-
-sed -i '' 's/from ${SRC%.*} import ${SRC##*.}/from ${DEST%.*} import ${DEST##*.}/g' "$FILES"
-
-isort "$FILES"
+isort -q -sl "$FILES"
+echo "s/from ${SRC%.*} import ${SRC##*.}/from ${DEST%.*} import ${DEST##*.}/g" 
+sed -i '' "s/from ${SRC%.*} import ${SRC##*.}/from ${DEST%.*} import ${DEST##*.}/g" "$FILES"
+isort -q "$FILES"
