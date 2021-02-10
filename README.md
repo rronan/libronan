@@ -1,5 +1,5 @@
 # libronan
 
 ```
-source environ.sh
+source environ.zsh
 ```
